@@ -1,0 +1,52 @@
+<html>
+
+<head>
+  <link media="(prefers-color-scheme: dark)" rel="icon" href="wo-dark-favicon.png">
+  <link media="(prefers-color-scheme: light)" rel="icon" href="wo-light-favicon.png">
+</head>
+
+<body id="root">
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const orchestrationID = urlParams.get('orchestrationID');
+    const deploymentPlatform = urlParams.get('deploymentPlatform') || 'ibmcloud';
+    const hostURL = urlParams.get('hostURL') || 'https://us-south.watson-orchestrate.cloud.ibm.com';
+
+    if (deploymentPlatform == 'ibmcloud') {
+      const crnPart = orchestrationID.replace(/_/g, ':')
+      const datacenter = hostURL.match(/:\/\/([^\.]+)/)[1].split('.')[0];
+      window.wxOConfiguration = {
+        clientVersion: "latest",
+        orchestrationID: orchestrationID,
+        hostURL: hostURL,
+        rootElementID: "root",
+        showLauncher: false, // set to false to render the chat window directly
+        // token: "<CLIENT_JWT_GOES_HERE>",
+        crn: `crn:v1:bluemix:public:watsonx-orchestrate:${datacenter}:a/${crnPart}::`,
+        deploymentPlatform: "ibmcloud"
+      };
+    } else {
+      window.wxOConfiguration = {
+        clientVersion: "latest",
+        orchestrationID: orchestrationID,
+        hostUrl: hostURL,
+        hostURL: hostURL, //workaround for unification
+        rootElementId: "root",
+        showLauncher: false
+        // token: "<CLIENT_JWT_GOES_HERE>"
+      };
+    }
+    console.log(window.wxOConfiguration);
+    debugger;
+    setTimeout(function () {
+      const script = document.createElement('script');
+      script.src = `${window.wxOConfiguration.hostURL}/webclient/wxoLoader.js`;
+      script.addEventListener('load', function () {
+        wxoLoader.init();
+      });
+      document.head.appendChild(script);
+    },);
+  </script>
+</body>
+
+</html>
